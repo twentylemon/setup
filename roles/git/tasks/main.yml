@@ -1,13 +1,14 @@
 ---
 - name: install git
-  package:
+  become: true
+  ansible.builtin.package:
     name:
       - git
       - tig
     state: present
 
 - name: create git aliases
-  git_config:
+  ansible.builtin.git_config:
     name: "{{ item.key }}"
     value: "{{ item.value }}"
     scope: global
@@ -21,3 +22,4 @@
       alias.st: status
       alias.undo: reset --hard
       alias.df: diff --stat
+      alias.wip: commit -a -m "🚧 wip"

@@ -1,0 +1,18 @@
+---
+- name: create directory for personal projects
+  ansible.builtin.file:
+    path: "{{ personal_root }}"
+    state: directory
+    mode: "0755"
+
+- name: personal git config
+  ansible.builtin.git_config:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    scope: local
+    repo: "{{ personal_root }}"
+    state: present
+  loop: "{{ config | dict2items }}"
+  vars:
+    config:
+      user.name: twentylemon

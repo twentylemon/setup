@@ -6,6 +6,7 @@ Scripts that perform initial setup of my machines.
 
 ```sh
 sudo apt-get install ansible
+ansible-galaxy collection install community.general
 ```
 
 ## run

@@ -6,6 +6,9 @@
       - git
       - tig
     state: present
+  tags:
+    - become
+    - packages
 
 - name: create git aliases
   ansible.builtin.git_config:
@@ -23,3 +26,9 @@
       alias.undo: reset --hard
       alias.df: diff --stat
       alias.wip: commit -a -m "🚧 wip"
+
+- name: work machine setup
+  ansible.builtin.include_tasks:
+    file: work.yml
+  tags:
+    - work

@@ -42,19 +42,3 @@ nano roles/vault/vars/main.yml
 ## post run
 
 * [add ssh keys to github accounts](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
-
-## todo
-* git config
-  * duckbot
-* work git/personal git setups
-* ssh
-* shell
-  * cow, fortune, cowsay
-  * bash completion
-* python
-* scala
-* nvm, node
-* java
-* docker
-* vscode, intellij settings
-* spark

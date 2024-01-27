@@ -4,11 +4,9 @@
   ansible.builtin.package:
     name:
       - git
+      - git-crypt
       - tig
     state: present
-  tags:
-    - become
-    - packages
 
 - name: create git aliases
   ansible.builtin.git_config:
@@ -27,8 +25,32 @@
       alias.df: diff --stat
       alias.wip: commit -a -m "🚧 wip"
 
+- name: create git home directory
+  ansible.builtin.file:
+    path: "{{ repo_root }}"
+    state: directory
+    mode: "0755"
+
+- name: generate ssh key
+  register: keypair
+  community.crypto.openssh_keypair:
+    path: "{{ default_sshkey }}"
+    type: ed25519
+    size: 4096
+    state: present
+
+- name: add key to ssh agent
+  when: keypair.changed
+  ansible.builtin.shell: |
+    eval "$(ssh-agent -s)"
+    ssh-add {{ default_sshkey }}
+
 - name: work machine setup
   ansible.builtin.include_tasks:
     file: work.yml
+    apply:
+      tags:
+        - work
   tags:
+    - never
     - work

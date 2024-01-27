@@ -6,13 +6,64 @@
     mode: "0755"
 
 - name: personal git config
-  ansible.builtin.git_config:
+  community.general.git_config:
     name: "{{ item.key }}"
     value: "{{ item.value }}"
-    scope: local
-    repo: "{{ personal_root }}"
+    scope: file
+    file: "{{ personal_root }}/.gitconfig"
     state: present
   loop: "{{ config | dict2items }}"
   vars:
     config:
       user.name: twentylemon
+      user.email: "{{ email }}"
+
+- name: work git config
+  community.general.git_config:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    scope: file
+    file: "{{ repo_root }}/.gitconfig"
+    state: present
+  loop: "{{ config | dict2items }}"
+  vars:
+    config:
+      user.name: "{{ work_user }}"
+      user.email: "{{ work_email }}"
+
+- name: generate personal ssh key
+  register: personal_keypair
+  community.crypto.openssh_keypair:
+    path: "{{ personal_sshkey }}"
+    type: ed25519
+    size: 4096
+    state: present
+
+- name: add key to ssh agent
+  when: personal_keypair.changed
+  ansible.builtin.shell: |
+    eval "$(ssh-agent -s)"
+    ssh-add {{ default_sshkey }}
+
+- name: install paramiko for ssh_config setup
+  ansible.builtin.pip:
+    name: paramiko
+    state: present
+
+- name: set up github.com ssh config
+  community.general.ssh_config:
+    user: "{{ ansible_user_id }}"
+    host: github.com
+    hostname: github.com
+    identity_file: "{{ default_sshkey }}"
+    remote_user: git
+    state: present
+
+- name: set up github.com-twentylemon ssh config
+  community.general.ssh_config:
+    user: "{{ ansible_user_id }}"
+    host: github.com-twentylemon
+    hostname: github.com
+    identity_file: "{{ personal_sshkey }}"
+    remote_user: git
+    state: present

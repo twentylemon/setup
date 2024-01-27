@@ -1,1 +1,23 @@
 ---
+- name: install git
+  package:
+    name:
+      - git
+      - tig
+    state: present
+
+- name: create git aliases
+  git_config:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    scope: global
+    state: present
+  loop: "{{ config | dict2items }}"
+  vars:
+    config:
+      alias.br: branch
+      alias.ft: fetch --all --prune
+      alias.co: checkout
+      alias.st: status
+      alias.undo: reset --hard
+      alias.df: diff --stat

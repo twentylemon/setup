@@ -31,6 +31,17 @@
       user.name: "{{ work_user }}"
       user.email: "{{ work_email }}"
 
+- name: import directory specific git configs
+  ansible.builtin.blockinfile:
+    path: "~/.gitconfig"
+    marker: "# {mark} ANSIBLE GITCONFIG PROFILES"
+    block: |
+      [includeIf "gitdif:{{ repo_root }}"]
+        path = {{ repo_root }}/.gitconfig
+      [includeIf "gitdif:{{ personal_root }}"]
+        path = {{ personal_root }}/.gitconfig
+    state: present
+
 - name: generate personal ssh key
   register: personal_keypair
   community.crypto.openssh_keypair:
@@ -44,11 +55,6 @@
   ansible.builtin.shell: |
     eval "$(ssh-agent -s)"
     ssh-add {{ default_sshkey }}
-
-- name: install paramiko for ssh_config setup
-  ansible.builtin.pip:
-    name: paramiko
-    state: present
 
 - name: set up github.com ssh config
   community.general.ssh_config:

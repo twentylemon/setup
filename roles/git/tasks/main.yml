@@ -8,7 +8,7 @@
       - tig
     state: present
 
-- name: create git aliases
+- name: create global git config
   ansible.builtin.git_config:
     name: "{{ item.key }}"
     value: "{{ item.value }}"
@@ -24,12 +24,19 @@
       alias.undo: reset --hard
       alias.df: diff --stat
       alias.wip: commit -a -m "🚧 wip"
+      user.name: twentylemon
+      user.email: "{{ email }}"
 
 - name: create git home directory
   ansible.builtin.file:
     path: "{{ repo_root }}"
     state: directory
     mode: "0755"
+
+- name: install paramiko for ssh_config setup
+  ansible.builtin.pip:
+    name: paramiko
+    state: present
 
 - name: generate ssh key
   register: keypair

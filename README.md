@@ -4,8 +4,10 @@ Scripts that perform initial setup of my machines.
 
 ## install
 
+`python3` is required for ansible.
+
 ```sh
-sudo apt-get install ansible
+python3 -m pip install ansible
 ansible-galaxy install -r requirements.yml
 
 # vault is used to encrypt work info, emails
@@ -37,6 +39,10 @@ ansible-vault encrypt_string 'secret-string' --name variable_name >> roles/vault
 nano roles/vault/vars/main.yml
 ```
 
+## post run
+
+* [add ssh keys to github accounts](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
+
 ## todo
 * git config
   * duckbot
@@ -51,3 +57,4 @@ nano roles/vault/vars/main.yml
 * java
 * docker
 * vscode, intellij settings
+* spark

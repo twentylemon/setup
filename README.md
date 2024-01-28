@@ -7,6 +7,8 @@ Scripts that perform initial setup of my machines.
 `python3` is required for ansible.
 
 ```sh
+sudo apt install python3-dev python3-pip python3-setuptools
+
 python3 -m pip install ansible
 ansible-galaxy install -r requirements.yml
 

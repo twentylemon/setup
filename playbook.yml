@@ -1,4 +1,5 @@
 ---
 - hosts: localhost
   roles:
-    - git
+    - { role: bash, tags: bash }
+    - { role: git, tags: git }

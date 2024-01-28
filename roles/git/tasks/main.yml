@@ -7,6 +7,7 @@
       - git-crypt
       - tig
     state: present
+    update_cache: true
 
 - name: create global git config
   ansible.builtin.git_config:

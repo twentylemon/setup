@@ -1,0 +1,83 @@
+---
+- name: install apt shell packages
+  become: true
+  ansible.builtin.package:
+    name:
+      - cowsay
+      - fortune-mod
+      - fortunes
+      - bash-completion
+      - htop
+      - zip
+      - unzip
+      - nano
+      - bc
+      - jq
+    state: present
+    update_cache: true
+
+- name: install snap shell packages
+  become: true
+  community.general.snap:
+    name:
+      - yq
+    state: present
+
+- name: add `bashrc` function
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    line: function bashrc() { source {{ rc_file }}; }
+    search_string: function bashrc(
+    state: present
+
+- name: add `cow` function
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    line: function cow() { sudo apt-get update && sudo apt-get autoremove && sudo apt-get autoclean; }
+    search_string: function cow(
+    state: present
+
+- name: add `cd` aliases
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    line: alias {{ item.alias }}='{{ item.cmd }}'
+    search_string: alias {{ item.alias }}=
+    state: present
+  loop:
+    - { alias: '..', cmd: 'cd ..' }
+    - { alias: '...', cmd: 'cd ../..' }
+    - { alias: '....', cmd: 'cd ../../..' }
+    - { alias: '.....', cmd: 'cd ../../../..' }
+
+- name: alias `mkdir` to always include parents
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    line: alias mkdir='mkdir -p'
+    search_string: alias mkdir=
+    state: present
+
+- name: add `where` alias
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    line: alias where='type -a'
+    search_string: alias where=
+    state: present
+
+- name: install the-f
+  ansible.builtin.pip:
+    name: thefuck
+    state: absent
+
+- name: alias the-f
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    line: eval $(thefuck --alias --enable-experimental-instant-mode)
+    search_string: thefuck
+    state: absent
+
+- name: display a fortune on shell open
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    line: fortune | cowsay -f $(ls /usr/share/cowsay/cows/ | shuf -n1)
+    search_string: fortune | cowsay
+    state: present

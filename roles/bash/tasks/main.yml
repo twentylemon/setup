@@ -26,7 +26,7 @@
 - name: add `bashrc` function
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
-    line: function bashrc() { source {{ rc_file }}; }
+    line: function bashrc() { source "{{ rc_file }}"; }
     search_string: function bashrc(
     state: present
 

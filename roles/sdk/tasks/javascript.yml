@@ -1,1 +1,58 @@
 ---
+- name: include javascript vars
+  ansible.builtin.include_vars:
+    file: javascript.yml
+
+- name: install nvm
+  ansible.builtin.shell:
+    cmd: "curl -o- 'https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh' | bash"
+    creates: "{{ ansible_env.HOME }}/.nvm/nvm.sh"
+
+- name: export NVM_DIR environment variable
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    line: export NVM_DIR="{{ nvm_dir }}"
+    search_string: export NVM_DIR=
+    state: present
+
+- name: remove nvm automatic config
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    search_string: "{{ item }}"
+    state: absent
+  loop:
+    - "$NVM_DIR/nvm.sh"
+    - "$NVM_DIR/bash_completion"
+
+- name: source nvm init script in rc file
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    line: source "{{ nvm_init }}"
+    state: present
+
+- name: source nvm completions in rc file
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    line: source "{{ nvm_dir }}/bash_completion"
+    state: present
+
+- name: install node versions
+  ansible.builtin.shell:
+    cmd: source "{{ nvm_init }}" && nvm install "{{ item }}"
+    creates: "{{ nvm_dir }}/versions/node/v{{ item }}"
+  loop: "{{ nodejs_versions }}"
+
+- name: determine current default node version
+  ansible.builtin.shell: source "{{ nvm_init }}" && nvm alias default
+  register: current_node
+  changed_when: false 
+
+- name: select default node version
+  ansible.builtin.shell: source "{{ nvm_init }}" && nvm alias default "{{ default_nodejs_version }}"
+  when: "default_nodejs_version not in current_node.stdout"
+
+- name: remove old node versions
+  ansible.builtin.shell:
+    cmd: source "{{ nvm_init }}" && nvm uninstall "{{ item }}"
+    removes: "{{ nvm_dir }}/versions/node/v{{ item }}"
+  loop: "{{ remove_nodejs_versions }}"

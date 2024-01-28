@@ -47,8 +47,7 @@
   loop: "{{ sdks }}"
 
 - name: determine current default sdk versions
-  ansible.builtin.shell:
-    cmd: source "{{ sdkman_init }}" && sdk current "{{ item.sdk }}"
+  ansible.builtin.shell: source "{{ sdkman_init }}" && sdk current "{{ item.sdk }}"
   register: current_sdk
   loop: "{{ default_sdk }}"
   changed_when: false

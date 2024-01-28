@@ -1,1 +1,9 @@
 ---
+nvm_dir: "{{ ansible_env.HOME }}/.nvm"
+nvm_init: "{{ nvm_dir }}/nvm.sh"
+
+nodejs_versions:
+  - '20.10.0'
+default_nodejs_version: '20.10.0'
+remove_nodejs_versions:
+  - '16.20.2'

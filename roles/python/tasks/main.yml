@@ -1,0 +1,28 @@
+---
+- name: install python versions
+  become: true
+  ansible.builtin.package:
+    name:
+      - "python{{ item }}"
+      - "python{{ item }}-dev"
+      - "python{{ item }}-venv"
+      - "python{{ item }}-dbg"
+    state: present
+    update_cache: true
+  loop: "{{ python_versions }}"
+
+- name: install python alternatives
+  become: true
+  community.general.alternatives:
+    name: python3
+    path: "/usr/bin/python{{ item }}"
+    link: /usr/bin/python3
+    state: present
+  loop: "{{ python_versions }}"
+
+- name: select default python alternative
+  become: true
+  community.general.alternatives:
+    name: python3
+    path: "/usr/bin/python{{ default_python_version }}"
+    state: selected

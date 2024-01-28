@@ -3,3 +3,4 @@
   roles:
     - { role: bash, tags: bash }
     - { role: git, tags: git }
+    - { role: python, tags: python }

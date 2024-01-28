@@ -5,3 +5,4 @@
     - { role: git, tags: git }
     - { role: python, tags: python }
     - { role: java, tags: java }
+    - { role: spark, tags: spark }

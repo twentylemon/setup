@@ -1,0 +1,5 @@
+---
+- name: install pyspark
+  ansible.builtin.pip:
+    name: pyspark
+    state: present

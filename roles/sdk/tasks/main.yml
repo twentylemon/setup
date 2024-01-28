@@ -1,21 +1,28 @@
 ---
-- name: install sdkman
+- name: sdkman
   ansible.builtin.include_tasks:
     file: sdkman.yml
     apply:
       tags: sdkman
   tags: sdkman
 
-- name: install python
+- name: python
   ansible.builtin.include_tasks:
     file: python.yml
     apply:
       tags: python
   tags: python
 
-- name: (legacy) install java
+- name: java
   ansible.builtin.include_tasks:
     file: java.yml
     apply:
       tags: java
   tags: java
+
+- name: spark
+  ansible.builtin.include_tasks:
+    file: spark.yml
+    apply:
+      tags: spark
+  tags: spark

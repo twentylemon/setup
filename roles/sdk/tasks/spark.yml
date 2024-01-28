@@ -1,5 +1,5 @@
 ---
-- name: install pyspark
+- name: remove pip pyspark
   ansible.builtin.pip:
     name: pyspark
-    state: present
+    state: absent

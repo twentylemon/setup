@@ -9,6 +9,15 @@
     update_cache: true
   loop: "{{ java_versions }}"
 
+- name: remove old java versions
+  become: true
+  ansible.builtin.package:
+    name:
+      - "openjdk-{{ item }}-jdk"
+      - "openjdk-{{ item }}-dbg"
+    state: absent
+  loop: "{{ removed_java_versions }}"
+
 - name: install `ca-certificates-java`
   become: true
   ansible.builtin.package:

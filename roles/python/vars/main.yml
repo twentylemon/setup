@@ -3,3 +3,6 @@ python_versions:
   - '3.10'
   - '3.12'
 default_python_version: '3.10'
+removed_python_versions:
+  - '3.5'
+  - '3.8'

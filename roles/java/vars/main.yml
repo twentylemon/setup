@@ -1,4 +1,7 @@
 ---
 java_versions:
   - '17'
+  - '21'
 default_java_version: '17'
+removed_java_versions:
+  - '8'

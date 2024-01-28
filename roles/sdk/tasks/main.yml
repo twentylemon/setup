@@ -26,3 +26,10 @@
     apply:
       tags: spark
   tags: spark
+
+- name: javascript
+  ansible.builtin.include_tasks:
+    file: javascript.yml
+    apply:
+      tags: javascript
+  tags: javascript

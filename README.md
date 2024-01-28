@@ -26,8 +26,6 @@ ansible-playbook playbook.yml --ask-become
 
 ### work setup
 
-Perform the setup via:
-
 ```sh
 ansible-playbook playbook.yml --ask-become --tags "all,never"
 ```

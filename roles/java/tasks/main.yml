@@ -1,0 +1,24 @@
+---
+- name: install java versions
+  become: true
+  ansible.builtin.package:
+    name:
+      - "openjdk-{{ item }}-jdk"
+      - "openjdk-{{ item }}-dbg"
+    state: present
+    update_cache: true
+  loop: "{{ java_versions }}"
+
+- name: install `ca-certificates-java`
+  become: true
+  ansible.builtin.package:
+    name: ca-certificates-java 
+    state: present
+    update_cache: true
+
+- name: select default java alternative
+  become: true
+  community.general.alternatives:
+    name: java
+    path: "/usr/lib/jvm/java-{{ default_java_version }}-openjdk-amd64/bin/java"
+    state: selected

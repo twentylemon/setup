@@ -11,9 +11,14 @@ sdks:
 
   - { sdk: maven, version: '3.9.6' }
 
+  - { sdk: scala, version: '3.3.1' }
+  - { sdk: sbt, version: '1.9.8' }
+
 default_sdk:
   - { sdk: java, version: '17.0.10-amzn' }
   - { sdk: maven, version: '3.9.6' }
+  - { sdk: scala, version: '3.3.1' }
+  - { sdk: sbt, version: '1.9.8' }
 
 remove_sdk:
   - { sdk: maven, version: '3.9.5' }

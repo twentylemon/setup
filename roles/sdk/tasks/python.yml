@@ -1,4 +1,8 @@
 ---
+- name: include python vars
+  ansible.builtin.include_vars:
+    file: python.yml
+
 - name: install python versions
   become: true
   ansible.builtin.package:
@@ -26,6 +30,7 @@
     name: python3
     path: "/usr/bin/python{{ default_python_version }}"
     state: selected
+  when: "default_python_version | bool"
 
 - name: remove old python versions
   become: true
@@ -36,7 +41,7 @@
       - "python{{ item }}-venv"
       - "python{{ item }}-dbg"
     state: absent
-  loop: "{{ removed_python_versions }}"
+  loop: "{{ remove_python_versions }}"
 
 - name: uninstall old python alternatives
   become: true
@@ -45,4 +50,4 @@
     path: "/usr/bin/python{{ item }}"
     link: /usr/bin/python3
     state: absent
-  loop: "{{ removed_python_versions }}"
+  loop: "{{ remove_python_versions }}"

@@ -1,0 +1,59 @@
+---
+- name: include sdkman vars
+  ansible.builtin.include_vars:
+    file: sdkman.yml
+
+- name: install sdkman
+  ansible.builtin.shell:
+    cmd: "curl -s 'https://get.sdkman.io?rcupdate=false' | bash"
+    creates: "{{ sdkman_dir }}"
+
+- name: export SDKMAN_DIR environment variable
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    line: export SDKMAN_DIR="{{ sdkman_dir }}"
+    search_string: export SDKMAN_DIR=
+    state: present
+
+- name: source sdkman init script in rc file
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    line: source "{{ sdkman_init }}"
+    search_string: source "{{ sdkman_dir }}/
+    state: present
+
+- name: configure sdkman to be non-interactive
+  ansible.builtin.lineinfile:
+    path: "{{ sdkman_config }}"
+    line: "{{ item.key }}={{ item.value }}"
+    search_string: "{{ item.key }}="
+    state: present
+  loop:
+    - { key: sdkman_auto_answer, value: "true" }
+    - { key: sdkman_selfupdate_feature, value: "false" }
+
+- name: install sdks
+  ansible.builtin.shell:
+    cmd: source "{{ sdkman_init }}" && sdk install "{{ item.sdk }}" "{{ item.version }}"
+    creates: "{{ sdkman_candidates }}/{{ item.sdk }}/{{ item.version }}"
+  loop: "{{ sdks }}"
+
+- name: determine current default sdk versions
+  ansible.builtin.shell:
+    cmd: source "{{ sdkman_init }}" && sdk current "{{ item.sdk }}"
+  register: current_sdk
+  loop: "{{ default_sdk }}"
+  changed_when: false
+
+- name: select default sdk version
+  ansible.builtin.shell: source "{{ sdkman_init }}" && sdk default "{{ item.sdk }}" "{{ item.version }}"
+  loop: "{{ default_sdk }}"
+  loop_control:
+    index_var: i
+  when: "current_sdk.results[i].item.version not in current_sdk.results[i].stdout"
+
+- name: remove old sdk versions
+  ansible.builtin.shell:
+    cmd: source "{{ sdkman_init }}" && sdk uninstall "{{ item.sdk }}" "{{ item.version }}"
+    removes: "{{ sdkman_candidates }}/{{ item.sdk }}/{{ item.version }}"
+  loop: "{{ remove_sdk }}"

@@ -1,0 +1,19 @@
+---
+sdkman_dir: "{{ ansible_env.HOME }}/.sdkman"
+sdkman_init: "{{ sdkman_dir }}/bin/sdkman-init.sh"
+sdkman_config: "{{ sdkman_dir }}/etc/config"
+sdkman_candidates: "{{ sdkman_dir }}/candidates"
+
+# https://sdkman.io/sdks
+sdks:
+  - { sdk: java, version: '17.0.10-amzn' }
+  - { sdk: java, version: '21.0.2-open' }
+
+  - { sdk: maven, version: '3.9.6' }
+
+default_sdk:
+  - { sdk: java, version: '17.0.10-amzn' }
+  - { sdk: maven, version: '3.9.6' }
+
+remove_sdk:
+  - { sdk: maven, version: '3.9.5' }

@@ -1,4 +1,8 @@
 ---
+- name: include java vars
+  ansible.builtin.include_vars:
+    file: java.yml
+
 - name: install java versions
   become: true
   ansible.builtin.package:
@@ -16,7 +20,7 @@
       - "openjdk-{{ item }}-jdk"
       - "openjdk-{{ item }}-dbg"
     state: absent
-  loop: "{{ removed_java_versions }}"
+  loop: "{{ remove_java_versions }}"
 
 - name: install `ca-certificates-java`
   become: true
@@ -31,3 +35,4 @@
     name: java
     path: "/usr/lib/jvm/java-{{ default_java_version }}-openjdk-amd64/bin/java"
     state: selected
+  when: "default_java_version | bool"

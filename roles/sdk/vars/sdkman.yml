@@ -1,27 +1,20 @@
 ---
-sdkman_dir: "{{ ansible_env.HOME }}/.sdkman"
+sdkman_dir: "{{ home }}/.sdkman"
 sdkman_init: "{{ sdkman_dir }}/bin/sdkman-init.sh"
 sdkman_config: "{{ sdkman_dir }}/etc/config"
 sdkman_candidates: "{{ sdkman_dir }}/candidates"
 
 # https://sdkman.io/sdks
 sdks:
-  - { sdk: java, version: '17.0.10-amzn' }
+  - { sdk: java, version: '17.0.10-amzn', default: true }
   - { sdk: java, version: '21.0.2-open' }
 
-  - { sdk: maven, version: '3.9.6' }
+  - { sdk: maven, version: '3.9.6', default: true }
 
-  - { sdk: scala, version: '3.3.1' }
-  - { sdk: sbt, version: '1.9.8' }
+  - { sdk: scala, version: '3.3.1', default: true }
+  - { sdk: sbt, version: '1.9.8', default: true }
 
-  - { sdk: spark, version: '3.4.1' }
-
-default_sdk:
-  - { sdk: java, version: '17.0.10-amzn' }
-  - { sdk: maven, version: '3.9.6' }
-  - { sdk: scala, version: '3.3.1' }
-  - { sdk: sbt, version: '1.9.8' }
-  - { sdk: spark, version: '3.4.1' }
+  - { sdk: spark, version: '3.4.1', default: true }
 
 remove_sdk:
   - { sdk: maven, version: '3.9.5' }

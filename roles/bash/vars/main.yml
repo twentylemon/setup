@@ -1,2 +1,2 @@
 ---
-rc_file: "{{ ansible_env.HOME }}/.bashrc"
+rc_file: "{{ home }}/.bashrc"

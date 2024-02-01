@@ -3,6 +3,8 @@
   module_defaults:
     ansible.builtin.shell:
       executable: /bin/bash
+  vars:
+    home: "{{ ansible_env.HOME }}"
   roles:
     - { role: bash, tags: bash }
     - { role: git, tags: git }

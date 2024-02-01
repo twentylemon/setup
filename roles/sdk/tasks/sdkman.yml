@@ -49,15 +49,16 @@
 - name: determine current default sdk versions
   ansible.builtin.shell: source "{{ sdkman_init }}" && sdk current "{{ item.sdk }}"
   register: current_sdk
-  loop: "{{ default_sdk }}"
+  loop: "{{ sdks }}"
+  when: "item.get('default', False)"
   changed_when: false
 
 - name: select default sdk version
   ansible.builtin.shell: source "{{ sdkman_init }}" && sdk default "{{ item.sdk }}" "{{ item.version }}"
-  loop: "{{ default_sdk }}"
+  loop: "{{ sdks }}"
   loop_control:
     index_var: i
-  when: "current_sdk.results[i].item.version not in current_sdk.results[i].stdout"
+  when: "item.get('default', False) and current_sdk.results[i].item.version not in current_sdk.results[i].stdout"
 
 - name: remove old sdk versions
   ansible.builtin.shell:

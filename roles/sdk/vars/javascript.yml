@@ -1,5 +1,5 @@
 ---
-nvm_dir: "{{ ansible_env.HOME }}/.nvm"
+nvm_dir: "{{ home }}/.nvm"
 nvm_init: "{{ nvm_dir }}/nvm.sh"
 
 nodejs_versions:

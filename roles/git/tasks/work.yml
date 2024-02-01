@@ -33,7 +33,7 @@
 
 - name: import directory specific git configs
   ansible.builtin.blockinfile:
-    path: "{{ ansible_env.HOME }}/.gitconfig"
+    path: "{{ home }}/.gitconfig"
     marker: "# {mark} ANSIBLE GITCONFIG PROFILES"
     block: |
       [includeIf "gitdif:{{ repo_root }}"]

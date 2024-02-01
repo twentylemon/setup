@@ -1,6 +1,6 @@
 ---
-repo_root: "{{ ansible_env.HOME }}/git"
-default_sshkey: "{{ ansible_env.HOME }}/.ssh/id_ed25519"
+repo_root: "{{ home }}/git"
+default_sshkey: "{{ home }}/.ssh/id_ed25519"
 
-personal_root: "{{ ansible_env.HOME }}/twentylemon"
-personal_sshkey: "{{ ansible_env.HOME }}/.ssh/personal"
+personal_root: "{{ home }}/twentylemon"
+personal_sshkey: "{{ home }}/.ssh/personal"

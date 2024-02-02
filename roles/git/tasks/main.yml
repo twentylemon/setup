@@ -9,6 +9,13 @@
     state: present
     update_cache: true
 
+- name: create global gitignore
+  ansible.builtin.file:
+    path: "{{ global_gitignore }}"
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+
 - name: create global git config
   ansible.builtin.git_config:
     name: "{{ item.key }}"
@@ -18,6 +25,7 @@
   loop: "{{ config | dict2items }}"
   vars:
     config:
+      core.excludesfile: "{{ global_gitignore }}"
       alias.br: branch
       alias.ft: fetch --all --prune
       alias.co: checkout
@@ -27,6 +35,15 @@
       alias.wip: commit -a -m "🚧 wip"
       user.name: twentylemon
       user.email: "{{ email }}"
+
+- name: append community gitignore to global gitignore
+  ansible.builtin.blockinfile:
+    name: "{{ global_gitignore }}"
+    marker: "# {mark} ANSIBLE {{ item.name }}"
+    block: "{{ lookup('url', item.url, split_lines=False) }}"
+    append_newline: true
+    state: present
+  loop: "{{ gitignore_sources }}"
 
 - name: create git home directory
   ansible.builtin.file:

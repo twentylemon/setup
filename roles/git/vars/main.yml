@@ -1,6 +1,13 @@
 ---
 repo_root: "{{ home }}/git"
 default_sshkey: "{{ home }}/.ssh/id_ed25519"
+global_gitignore: "{{ home }}/.gitignore_global"
+gitignore_sources:
+  - { name: 'vscode', url: 'https://raw.githubusercontent.com/github/gitignore/main/Global/VisualStudioCode.gitignore' }
+  - { name: 'idea', url: 'https://raw.githubusercontent.com/github/gitignore/main/Global/JetBrains.gitignore' }
+  - { name: 'java', url: 'https://raw.githubusercontent.com/github/gitignore/main/Java.gitignore' }
+  - { name: 'scala', url: 'https://raw.githubusercontent.com/github/gitignore/main/Scala.gitignore' }
+  - { name: 'python', url: 'https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore' }
 
 personal_root: "{{ home }}/twentylemon"
 personal_sshkey: "{{ home }}/.ssh/personal"

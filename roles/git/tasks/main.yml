@@ -30,9 +30,13 @@
       alias.ft: fetch --all --prune
       alias.co: checkout
       alias.st: status
+      alias.up: "!git ft && git pull && git st || git st && git pull && git st"
       alias.undo: reset --hard
       alias.df: diff --stat
       alias.wip: commit -a -m "🚧 wip"
+      alias.compress: repack -a -d -f --depth=250 --window=250 --threads=8 --window-memory=256m
+      alias.maintain: "!git compress && git maintenance run --auto && git gc --aggressive --prune=now"
+      pack.windowMemory: "256m"
       user.name: twentylemon
       user.email: "{{ email }}"
 

@@ -3,6 +3,26 @@ rc_files:
   - "{{ home }}/.zshrc"
   - "{{ home }}/.bashrc"
 
+shell_packages:
+  Linux:
+    - cowsay
+    - fortune-mod
+    - fortunes
+    - bash-completion
+    - htop
+    - zip
+    - unzip
+    - nano
+    - bc
+    - jq
+  Darwin:
+    - jq
+    - yq
+    - htop
+    - cowsay
+    - fortune
+    - bash-completion@2
+
 update_cmd_linux: "sudo apt-get update && sudo apt-get autoremove && sudo apt-get autoclean"
 update_cmd_macos: "brew update && brew upgrade && brew cleanup"
 

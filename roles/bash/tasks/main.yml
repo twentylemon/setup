@@ -1,40 +1,16 @@
 ---
-- name: install apt shell packages
-  when: ansible_facts.os_family == "Debian"
-  become: true
+- name: install shell packages
+  become: "{{ ansible_facts.system == 'Linux' }}"
   ansible.builtin.package:
-    name:
-      - cowsay
-      - fortune-mod
-      - fortunes
-      - bash-completion
-      - htop
-      - zip
-      - unzip
-      - nano
-      - bc
-      - jq
+    name: "{{ shell_packages[ansible_facts.system] }}"
     state: present
-    update_cache: true
 
-- name: install snap shell packages
+- name: install snap shell packages (linux)
   when: ansible_facts.os_family == "Debian"
   become: true
   community.general.snap:
     name:
       - yq
-    state: present
-
-- name: install brew shell packages
-  when: ansible_facts.system == "Darwin"
-  community.general.homebrew:
-    name:
-      - jq
-      - yq
-      - htop
-      - cowsay
-      - fortune
-      - bash-completion@2
     state: present
 
 - name: source ~/.bashrc from ~/.bash_profile (macos)

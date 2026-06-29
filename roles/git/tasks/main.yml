@@ -1,18 +1,7 @@
 ---
-- name: install git (linux)
-  when: ansible_facts.os_family == "Debian"
-  become: true
+- name: install git
+  become: "{{ ansible_facts.system == 'Linux' }}"
   ansible.builtin.package:
-    name:
-      - git
-      - git-crypt
-      - tig
-    state: present
-    update_cache: true
-
-- name: install git (macos)
-  when: ansible_facts.system == "Darwin"
-  community.general.homebrew:
     name:
       - git
       - git-crypt

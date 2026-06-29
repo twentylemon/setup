@@ -1,13 +1,12 @@
 ---
 - name: install git
-  become: true
+  become: "{{ ansible_facts.system == 'Linux' }}"
   ansible.builtin.package:
     name:
       - git
       - git-crypt
       - tig
     state: present
-    update_cache: true
 
 - name: create global gitignore
   ansible.builtin.file:
@@ -15,6 +14,21 @@
     state: touch
     modification_time: preserve
     access_time: preserve
+
+- name: create git scripts directory
+  ansible.builtin.file:
+    path: "{{ git_scripts_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: install git alias scripts
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ git_scripts_dir }}/{{ item }}"
+    mode: "0755"
+  loop:
+    - ft.sh
+    - cl.sh
 
 - name: create global git config
   ansible.builtin.git_config:
@@ -26,19 +40,27 @@
   vars:
     config:
       core.excludesfile: "{{ global_gitignore }}"
+      core.whitespace: trailing-space,space-before-tab
+      diff.mnemonicprefix: "true"
+      feature.manyfiles: "1"
+      http.postbuffer: "524288000"
+      merge.stat: "true"
+      mergetool.keepbackup: "false"
+      pack.windowmemory: 256m
+      push.default: simple
+      "url.git@github.com:.insteadof": "https://github.com/"
       alias.br: branch
-      alias.ft: fetch --all --prune
       alias.co: checkout
       alias.st: status
       alias.up: "!git ft && git pull && git st || git st && git pull && git st"
       alias.undo: reset --hard
       alias.df: diff --stat
       alias.wip: commit -a -m "🚧 wip"
-      alias.compress: repack -a -d -f --depth=250 --window=250 --threads=8 --window-memory=256m
-      alias.maintain: "!git compress && git maintenance run --auto && git gc --aggressive --prune=now"
-      pack.windowMemory: "256m"
-      user.name: twentylemon
-      user.email: "{{ email }}"
+      alias.compress: repack -a -d -f --depth=250 --window=250 --threads=12 --window-memory=256m
+      alias.size: "!du -h -d 0 $(git rev-parse --show-toplevel)/.git"
+      alias.maintain: "!git size && git compress && git maintenance run --auto && git gc --aggressive --prune=now && git size"
+      alias.ft: "!{{ git_scripts_dir }}/ft.sh"
+      alias.cl: "!{{ git_scripts_dir }}/cl.sh"
 
 - name: append community gitignore to global gitignore
   ansible.builtin.blockinfile:

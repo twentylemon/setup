@@ -3,7 +3,8 @@
   ansible.builtin.include_vars:
     file: sdkman.yml
 
-- name: install sdkman dependencies
+- name: install sdkman dependencies (linux)
+  when: ansible_facts.os_family == "Debian"
   become: true
   ansible.builtin.package:
     name:
@@ -19,16 +20,24 @@
 - name: export SDKMAN_DIR environment variable
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
+    create: true
     line: export SDKMAN_DIR="{{ sdkman_dir }}"
     search_string: export SDKMAN_DIR=
     state: present
+  loop: "{{ rc_files }}"
+  loop_control:
+    loop_var: rc_file
 
 - name: source sdkman init script in rc file
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
+    create: true
     line: source "{{ sdkman_init }}"
     search_string: source "{{ sdkman_dir }}/
     state: present
+  loop: "{{ rc_files }}"
+  loop_control:
+    loop_var: rc_file
 
 - name: configure sdkman to be non-interactive
   ansible.builtin.lineinfile:
@@ -43,18 +52,23 @@
 - name: install sdks
   ansible.builtin.shell:
     cmd: source "{{ sdkman_init }}" && sdk install "{{ item.sdk }}" "{{ item.version }}"
+    executable: /bin/bash
     creates: "{{ sdkman_candidates }}/{{ item.sdk }}/{{ item.version }}"
   loop: "{{ sdks }}"
 
 - name: determine current default sdk versions
-  ansible.builtin.shell: source "{{ sdkman_init }}" && sdk current "{{ item.sdk }}"
+  ansible.builtin.shell:
+    cmd: source "{{ sdkman_init }}" && sdk current "{{ item.sdk }}"
+    executable: /bin/bash
   register: current_sdk
   loop: "{{ sdks }}"
   when: "item.get('default', False)"
   changed_when: false
 
 - name: select default sdk version
-  ansible.builtin.shell: source "{{ sdkman_init }}" && sdk default "{{ item.sdk }}" "{{ item.version }}"
+  ansible.builtin.shell:
+    cmd: source "{{ sdkman_init }}" && sdk default "{{ item.sdk }}" "{{ item.version }}"
+    executable: /bin/bash
   loop: "{{ sdks }}"
   loop_control:
     index_var: i
@@ -63,5 +77,6 @@
 - name: remove old sdk versions
   ansible.builtin.shell:
     cmd: source "{{ sdkman_init }}" && sdk uninstall "{{ item.sdk }}" "{{ item.version }}"
+    executable: /bin/bash
     removes: "{{ sdkman_candidates }}/{{ item.sdk }}/{{ item.version }}"
   loop: "{{ remove_sdk }}"

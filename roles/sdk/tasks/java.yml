@@ -3,7 +3,10 @@
   ansible.builtin.include_vars:
     file: java.yml
 
-- name: install java versions
+# --- linux: openjdk via apt + `alternatives` ---
+
+- name: install java versions (linux)
+  when: ansible_facts.os_family == "Debian"
   become: true
   ansible.builtin.package:
     name:
@@ -13,7 +16,8 @@
     update_cache: true
   loop: "{{ java_versions }}"
 
-- name: remove old java versions
+- name: remove old java versions (linux)
+  when: ansible_facts.os_family == "Debian"
   become: true
   ansible.builtin.package:
     name:
@@ -22,17 +26,50 @@
     state: absent
   loop: "{{ remove_java_versions }}"
 
-- name: install `ca-certificates-java`
+- name: install `ca-certificates-java` (linux)
+  when: ansible_facts.os_family == "Debian"
   become: true
   ansible.builtin.package:
-    name: ca-certificates-java 
+    name: ca-certificates-java
     state: present
     update_cache: true
 
-- name: select default java alternative
+- name: select default java alternative (linux)
+  when:
+    - ansible_facts.os_family == "Debian"
+    - default_java_version | length > 0
   become: true
   community.general.alternatives:
     name: java
     path: "/usr/lib/jvm/java-{{ default_java_version }}-openjdk-amd64/bin/java"
     state: selected
-  when: "default_java_version | bool"
+
+# --- macos: corretto via brew cask ---
+
+- name: install java versions (macos)
+  when: ansible_facts.system == "Darwin"
+  community.general.homebrew_cask:
+    name: "corretto@{{ item }}"
+    state: present
+  loop: "{{ java_versions }}"
+
+- name: remove old java versions (macos)
+  when: ansible_facts.system == "Darwin"
+  community.general.homebrew_cask:
+    name: "corretto@{{ item }}"
+    state: absent
+  loop: "{{ remove_java_versions }}"
+
+- name: export JAVA_HOME in rc files (macos)
+  when:
+    - ansible_facts.system == "Darwin"
+    - default_java_version | length > 0
+  ansible.builtin.lineinfile:
+    path: "{{ rc_file }}"
+    create: true
+    line: export JAVA_HOME=/Library/Java/JavaVirtualMachines/amazon-corretto-{{ default_java_version }}.jdk/Contents/Home
+    search_string: export JAVA_HOME=
+    state: present
+  loop: "{{ rc_files }}"
+  loop_control:
+    loop_var: rc_file

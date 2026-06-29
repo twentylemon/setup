@@ -1,83 +1,121 @@
 ---
-- name: install apt shell packages
-  become: true
+- name: install shell packages
+  become: "{{ ansible_facts.system == 'Linux' }}"
+  vars:
+    shell_packages:
+      Linux:
+        - cowsay
+        - fortune-mod
+        - fortunes
+        - bash-completion
+        - htop
+        - zip
+        - unzip
+        - nano
+        - bc
+        - jq
+      Darwin:
+        - jq
+        - yq
+        - htop
+        - cowsay
+        - fortune
+        - bash-completion@2
   ansible.builtin.package:
-    name:
-      - cowsay
-      - fortune-mod
-      - fortunes
-      - bash-completion
-      - htop
-      - zip
-      - unzip
-      - nano
-      - bc
-      - jq
+    name: "{{ shell_packages[ansible_facts.system] }}"
     state: present
-    update_cache: true
 
-- name: install snap shell packages
+- name: install snap shell packages (linux)
+  when: ansible_facts.os_family == "Debian"
   become: true
   community.general.snap:
     name:
       - yq
     state: present
 
+- name: source ~/.bashrc from ~/.bash_profile (macos)
+  when: ansible_facts.system == "Darwin"
+  ansible.builtin.lineinfile:
+    path: "{{ home }}/.bash_profile"
+    create: true
+    line: '[ -f ~/.bashrc ] && source ~/.bashrc'
+    search_string: "source ~/.bashrc"
+    state: present
+
 - name: add `bashrc` function
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
+    create: true
     line: function bashrc() { source "{{ rc_file }}"; }
     search_string: function bashrc(
     state: present
+  loop: "{{ rc_files }}"
+  loop_control:
+    loop_var: rc_file
 
 - name: add `cow` function
+  vars:
+    update_cmd:
+      Linux: "sudo apt-get update && sudo apt-get autoremove && sudo apt-get autoclean"
+      Darwin: "brew update && brew upgrade && brew cleanup"
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
-    line: function cow() { sudo apt-get update && sudo apt-get autoremove && sudo apt-get autoclean; }
+    create: true
+    line: "function cow() { {{ update_cmd[ansible_facts.system] }}; }"
     search_string: function cow(
     state: present
+  loop: "{{ rc_files }}"
+  loop_control:
+    loop_var: rc_file
 
 - name: add `cd` aliases
   ansible.builtin.lineinfile:
-    path: "{{ rc_file }}"
-    line: alias {{ item.alias }}='{{ item.cmd }}'
-    search_string: alias {{ item.alias }}=
+    path: "{{ item.0 }}"
+    create: true
+    line: alias {{ item.1.alias }}='{{ item.1.cmd }}'
+    search_string: alias {{ item.1.alias }}=
     state: present
-  loop:
-    - { alias: '..', cmd: 'cd ..' }
-    - { alias: '...', cmd: 'cd ../..' }
-    - { alias: '....', cmd: 'cd ../../..' }
-    - { alias: '.....', cmd: 'cd ../../../..' }
+  loop: "{{ rc_files | product(cd_aliases) | list }}"
+  vars:
+    cd_aliases:
+      - { alias: '..', cmd: 'cd ..' }
+      - { alias: '...', cmd: 'cd ../..' }
+      - { alias: '....', cmd: 'cd ../../..' }
+      - { alias: '.....', cmd: 'cd ../../../..' }
 
 - name: alias `mkdir` to always include parents
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
+    create: true
     line: alias mkdir='mkdir -p'
     search_string: alias mkdir=
     state: present
+  loop: "{{ rc_files }}"
+  loop_control:
+    loop_var: rc_file
 
 - name: add `where` alias
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
+    create: true
     line: alias where='type -a'
     search_string: alias where=
     state: present
-
-- name: install the-f
-  ansible.builtin.pip:
-    name: thefuck
-    state: absent
-
-- name: alias the-f
-  ansible.builtin.lineinfile:
-    path: "{{ rc_file }}"
-    line: eval $(thefuck --alias --enable-experimental-instant-mode)
-    search_string: thefuck
-    state: absent
+  loop: "{{ rc_files }}"
+  loop_control:
+    loop_var: rc_file
 
 - name: display a fortune on shell open
+  vars:
+    cows_dir:
+      Linux: "/usr/share/cowsay/cows"
+      Darwin: "/opt/homebrew/share/cowsay/cows"
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
-    line: fortune | cowsay -f $(ls /usr/share/cowsay/cows/ | shuf -n1)
+    create: true
+    line: "fortune | cowsay -f $(ls {{ cows_dir[ansible_facts.system] }}/ | shuf -n1)"
     search_string: fortune | cowsay
     state: present
+  loop: "{{ rc_files }}"
+  loop_control:
+    loop_var: rc_file

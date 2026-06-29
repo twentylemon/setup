@@ -1,2 +1,4 @@
 ---
-rc_file: "{{ home }}/.bashrc"
+rc_files:
+  - "{{ home }}/.zshrc"
+  - "{{ home }}/.bashrc"

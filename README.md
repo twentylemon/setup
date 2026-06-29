@@ -1,10 +1,23 @@
 # setup
 
-Scripts that perform initial setup of my machines.
+Scripts that perform initial setup of my machines. Supports both macOS (Homebrew) and Debian/Ubuntu (apt). Shell config is written to both `~/.zshrc` and `~/.bashrc` so either shell works.
 
 ## install
 
-`python3` is required for ansible.
+`python3` and `ansible` are required.
+
+### macOS
+
+```sh
+brew install ansible
+
+ansible-galaxy install -r requirements.yml
+
+# vault is used to encrypt work info, emails
+echo $VAULT_PASSWORD > pass
+```
+
+### Debian/Ubuntu
 
 ```sh
 sudo apt install python3-dev python3-pip python3-setuptools
@@ -22,6 +35,17 @@ echo $VAULT_PASSWORD > pass
 
 ```sh
 ansible-playbook playbook.yml --ask-become
+```
+
+Run individual roles or sub-tasks by tag:
+
+```sh
+ansible-playbook playbook.yml --ask-become --tags bash
+ansible-playbook playbook.yml --ask-become --tags git
+ansible-playbook playbook.yml --ask-become --tags javascript
+ansible-playbook playbook.yml --ask-become --tags python
+ansible-playbook playbook.yml --ask-become --tags java
+ansible-playbook playbook.yml --ask-become --tags sdkman
 ```
 
 ### work setup

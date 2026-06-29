@@ -1,6 +1,7 @@
 ---
-java_versions: []
-default_java_version:
+java_versions:
+  - '11'
+default_java_version: '11'
 remove_java_versions:
   - '8'
   - '17'

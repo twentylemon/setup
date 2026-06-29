@@ -32,24 +32,11 @@
   loop_control:
     loop_var: rc_file
 
-- name: add `cow` function (linux)
-  when: ansible_facts.os_family == "Debian"
+- name: add `cow` function
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
     create: true
-    line: "function cow() { {{ update_cmd_linux }}; }"
-    search_string: function cow(
-    state: present
-  loop: "{{ rc_files }}"
-  loop_control:
-    loop_var: rc_file
-
-- name: add `cow` function (macos)
-  when: ansible_facts.system == "Darwin"
-  ansible.builtin.lineinfile:
-    path: "{{ rc_file }}"
-    create: true
-    line: "function cow() { {{ update_cmd_macos }}; }"
+    line: "function cow() { {{ update_cmd[ansible_facts.system] }}; }"
     search_string: function cow(
     state: present
   loop: "{{ rc_files }}"
@@ -93,24 +80,11 @@
   loop_control:
     loop_var: rc_file
 
-- name: display a fortune on shell open (linux)
-  when: ansible_facts.os_family == "Debian"
+- name: display a fortune on shell open
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
     create: true
-    line: "fortune | cowsay -f $(ls {{ cows_dir_linux }}/ | shuf -n1)"
-    search_string: fortune | cowsay
-    state: present
-  loop: "{{ rc_files }}"
-  loop_control:
-    loop_var: rc_file
-
-- name: display a fortune on shell open (macos)
-  when: ansible_facts.system == "Darwin"
-  ansible.builtin.lineinfile:
-    path: "{{ rc_file }}"
-    create: true
-    line: "fortune | cowsay -f $(ls {{ cows_dir_macos }}/ | shuf -n1)"
+    line: "fortune | cowsay -f $(ls {{ cows_dir[ansible_facts.system] }}/ | shuf -n1)"
     search_string: fortune | cowsay
     state: present
   loop: "{{ rc_files }}"

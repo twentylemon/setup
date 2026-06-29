@@ -26,8 +26,10 @@ shell_packages:
 snap_packages:
   - yq
 
-update_cmd_linux: "sudo apt-get update && sudo apt-get autoremove && sudo apt-get autoclean"
-update_cmd_macos: "brew update && brew upgrade && brew cleanup"
+update_cmd:
+  Linux: "sudo apt-get update && sudo apt-get autoremove && sudo apt-get autoclean"
+  Darwin: "brew update && brew upgrade && brew cleanup"
 
-cows_dir_linux: "/usr/share/cowsay/cows"
-cows_dir_macos: "/opt/homebrew/share/cowsay/cows"
+cows_dir:
+  Linux: "/usr/share/cowsay/cows"
+  Darwin: "/opt/homebrew/share/cowsay/cows"

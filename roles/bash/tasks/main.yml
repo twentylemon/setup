@@ -9,8 +9,7 @@
   when: ansible_facts.os_family == "Debian"
   become: true
   community.general.snap:
-    name:
-      - yq
+    name: "{{ snap_packages }}"
     state: present
 
 - name: source ~/.bashrc from ~/.bash_profile (macos)

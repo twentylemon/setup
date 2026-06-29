@@ -23,6 +23,9 @@ shell_packages:
     - fortune
     - bash-completion@2
 
+snap_packages:
+  - yq
+
 update_cmd_linux: "sudo apt-get update && sudo apt-get autoremove && sudo apt-get autoclean"
 update_cmd_macos: "brew update && brew upgrade && brew cleanup"
 

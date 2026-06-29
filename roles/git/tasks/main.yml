@@ -15,6 +15,21 @@
     modification_time: preserve
     access_time: preserve
 
+- name: create git scripts directory
+  ansible.builtin.file:
+    path: "{{ git_scripts_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: install git alias scripts
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ git_scripts_dir }}/{{ item }}"
+    mode: "0755"
+  loop:
+    - ft.sh
+    - cl.sh
+
 - name: create global git config
   ansible.builtin.git_config:
     name: "{{ item.key }}"
@@ -44,10 +59,8 @@
       alias.compress: repack -a -d -f --depth=250 --window=250 --threads=12 --window-memory=256m
       alias.size: "!du -h -d 0 $(git rev-parse --show-toplevel)/.git"
       alias.maintain: "!git size && git compress && git maintenance run --auto && git gc --aggressive --prune=now && git size"
-      alias.ft: |-
-        !f() { default=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed "s|^origin/||"); if [ -z "$default" ]; then git remote set-head origin -a >/dev/null 2>&1; default=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed "s|^origin/||"); fi; if [ -z "$default" ]; then echo "git ft: could not determine default branch for origin" >&2; return 1; fi; git config --local --unset-all remote.origin.fetch 2>/dev/null; git config --local --add remote.origin.fetch "+refs/heads/${default}:refs/remotes/origin/${default}"; git config --local --add remote.origin.fetch "+refs/heads/twentylemon/*:refs/remotes/origin/twentylemon/*"; git fetch --prune --prune-tags; }; f
-      alias.cl: |-
-        !f() { out=$(git clone "$@" 2>&1); rc=$?; echo "$out"; [ $rc -ne 0 ] && return $rc; dir=$(echo "$out" | sed -n "s/Cloning into '\(.*\)'.*/\1/p"); if [ -n "$dir" ] && [ -d "$dir" ]; then default=$(git -C "$dir" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed "s|^origin/||"); if [ -z "$default" ]; then git -C "$dir" remote set-head origin -a >/dev/null 2>&1; default=$(git -C "$dir" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed "s|^origin/||"); fi; if [ -z "$default" ]; then echo "git cl: could not determine default branch for origin" >&2; return 1; fi; git -C "$dir" config --local --unset-all remote.origin.fetch 2>/dev/null; git -C "$dir" config --local --add remote.origin.fetch "+refs/heads/${default}:refs/remotes/origin/${default}"; git -C "$dir" config --local --add remote.origin.fetch "+refs/heads/twentylemon/*:refs/remotes/origin/twentylemon/*"; echo "Configured narrow fetch: ${default} + twentylemon/*"; fi; }; f
+      alias.ft: "!{{ git_scripts_dir }}/ft.sh"
+      alias.cl: "!{{ git_scripts_dir }}/cl.sh"
 
 - name: append community gitignore to global gitignore
   ansible.builtin.blockinfile:

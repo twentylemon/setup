@@ -2,6 +2,7 @@
 repo_root: "{{ home }}/git"
 default_sshkey: "{{ home }}/.ssh/id_ed25519"
 global_gitignore: "{{ home }}/.gitignore_global"
+git_scripts_dir: "{{ home }}/.config/git/scripts"
 gitignore_sources:
   - { name: 'vscode', url: 'https://raw.githubusercontent.com/github/gitignore/main/Global/VisualStudioCode.gitignore' }
   - { name: 'idea', url: 'https://raw.githubusercontent.com/github/gitignore/main/Global/JetBrains.gitignore' }

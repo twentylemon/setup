@@ -1,5 +1,6 @@
 ---
-- name: install git
+- name: install git (linux)
+  when: ansible_facts.os_family == "Debian"
   become: true
   ansible.builtin.package:
     name:
@@ -8,6 +9,15 @@
       - tig
     state: present
     update_cache: true
+
+- name: install git (macos)
+  when: ansible_facts.system == "Darwin"
+  community.general.homebrew:
+    name:
+      - git
+      - git-crypt
+      - tig
+    state: present
 
 - name: create global gitignore
   ansible.builtin.file:
@@ -26,19 +36,29 @@
   vars:
     config:
       core.excludesfile: "{{ global_gitignore }}"
+      core.whitespace: trailing-space,space-before-tab
+      diff.mnemonicprefix: "true"
+      feature.manyfiles: "1"
+      http.postbuffer: "524288000"
+      merge.stat: "true"
+      mergetool.keepbackup: "false"
+      pack.windowmemory: 256m
+      push.default: simple
+      "url.git@github.com:.insteadof": "https://github.com/"
       alias.br: branch
-      alias.ft: fetch --all --prune
       alias.co: checkout
       alias.st: status
       alias.up: "!git ft && git pull && git st || git st && git pull && git st"
       alias.undo: reset --hard
       alias.df: diff --stat
       alias.wip: commit -a -m "🚧 wip"
-      alias.compress: repack -a -d -f --depth=250 --window=250 --threads=8 --window-memory=256m
-      alias.maintain: "!git compress && git maintenance run --auto && git gc --aggressive --prune=now"
-      pack.windowMemory: "256m"
-      user.name: twentylemon
-      user.email: "{{ email }}"
+      alias.compress: repack -a -d -f --depth=250 --window=250 --threads=12 --window-memory=256m
+      alias.size: "!du -h -d 0 $(git rev-parse --show-toplevel)/.git"
+      alias.maintain: "!git size && git compress && git maintenance run --auto && git gc --aggressive --prune=now && git size"
+      alias.ft: |-
+        !f() { default=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed "s|^origin/||"); if [ -z "$default" ]; then git remote set-head origin -a >/dev/null 2>&1; default=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed "s|^origin/||"); fi; if [ -z "$default" ]; then echo "git ft: could not determine default branch for origin" >&2; return 1; fi; git config --local --unset-all remote.origin.fetch 2>/dev/null; git config --local --add remote.origin.fetch "+refs/heads/${default}:refs/remotes/origin/${default}"; git config --local --add remote.origin.fetch "+refs/heads/twentylemon/*:refs/remotes/origin/twentylemon/*"; git fetch --prune --prune-tags; }; f
+      alias.cl: |-
+        !f() { out=$(git clone "$@" 2>&1); rc=$?; echo "$out"; [ $rc -ne 0 ] && return $rc; dir=$(echo "$out" | sed -n "s/Cloning into '\(.*\)'.*/\1/p"); if [ -n "$dir" ] && [ -d "$dir" ]; then default=$(git -C "$dir" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed "s|^origin/||"); if [ -z "$default" ]; then git -C "$dir" remote set-head origin -a >/dev/null 2>&1; default=$(git -C "$dir" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed "s|^origin/||"); fi; if [ -z "$default" ]; then echo "git cl: could not determine default branch for origin" >&2; return 1; fi; git -C "$dir" config --local --unset-all remote.origin.fetch 2>/dev/null; git -C "$dir" config --local --add remote.origin.fetch "+refs/heads/${default}:refs/remotes/origin/${default}"; git -C "$dir" config --local --add remote.origin.fetch "+refs/heads/twentylemon/*:refs/remotes/origin/twentylemon/*"; echo "Configured narrow fetch: ${default} + twentylemon/*"; fi; }; f
 
 - name: append community gitignore to global gitignore
   ansible.builtin.blockinfile:

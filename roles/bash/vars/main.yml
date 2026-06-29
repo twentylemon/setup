@@ -1,2 +1,10 @@
 ---
-rc_file: "{{ home }}/.bashrc"
+rc_files:
+  - "{{ home }}/.zshrc"
+  - "{{ home }}/.bashrc"
+
+update_cmd_linux: "sudo apt-get update && sudo apt-get autoremove && sudo apt-get autoclean"
+update_cmd_macos: "brew update && brew upgrade && brew cleanup"
+
+cows_dir_linux: "/usr/share/cowsay/cows"
+cows_dir_macos: "/opt/homebrew/share/cowsay/cows"

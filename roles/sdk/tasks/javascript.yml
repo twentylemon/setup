@@ -11,48 +11,66 @@
 - name: export NVM_DIR environment variable
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
+    create: true
     line: export NVM_DIR="{{ nvm_dir }}"
     search_string: export NVM_DIR=
     state: present
+  loop: "{{ rc_files }}"
+  loop_control:
+    loop_var: rc_file
 
 - name: remove nvm automatic config
   ansible.builtin.lineinfile:
-    path: "{{ rc_file }}"
-    search_string: "{{ item }}"
+    path: "{{ item.0 }}"
+    search_string: "{{ item.1 }}"
     state: absent
-  loop:
-    - "$NVM_DIR/nvm.sh"
-    - "$NVM_DIR/bash_completion"
+  loop: "{{ rc_files | product(['$NVM_DIR/nvm.sh', '$NVM_DIR/bash_completion']) | list }}"
+  loop_control:
+    label: "{{ item.0 }} / {{ item.1 }}"
 
 - name: source nvm init script in rc file
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
+    create: true
     line: source "{{ nvm_init }}"
     state: present
+  loop: "{{ rc_files }}"
+  loop_control:
+    loop_var: rc_file
 
 - name: source nvm completions in rc file
   ansible.builtin.lineinfile:
     path: "{{ rc_file }}"
+    create: true
     line: source "{{ nvm_dir }}/bash_completion"
     state: present
+  loop: "{{ rc_files }}"
+  loop_control:
+    loop_var: rc_file
 
 - name: install node versions
   ansible.builtin.shell:
     cmd: source "{{ nvm_init }}" && nvm install "{{ item }}"
+    executable: /bin/bash
     creates: "{{ nvm_dir }}/versions/node/v{{ item }}"
   loop: "{{ nodejs_versions }}"
 
 - name: determine current default node version
-  ansible.builtin.shell: source "{{ nvm_init }}" && nvm alias default
+  ansible.builtin.shell:
+    cmd: source "{{ nvm_init }}" && nvm alias default
+    executable: /bin/bash
   register: current_node
-  changed_when: false 
+  changed_when: false
 
 - name: select default node version
-  ansible.builtin.shell: source "{{ nvm_init }}" && nvm alias default "{{ default_nodejs_version }}"
+  ansible.builtin.shell:
+    cmd: source "{{ nvm_init }}" && nvm alias default "{{ default_nodejs_version }}"
+    executable: /bin/bash
   when: "default_nodejs_version not in current_node.stdout"
 
 - name: remove old node versions
   ansible.builtin.shell:
     cmd: source "{{ nvm_init }}" && nvm uninstall "{{ item }}"
+    executable: /bin/bash
     removes: "{{ nvm_dir }}/versions/node/v{{ item }}"
   loop: "{{ remove_nodejs_versions }}"

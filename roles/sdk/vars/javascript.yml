@@ -3,7 +3,8 @@ nvm_dir: "{{ home }}/.nvm"
 nvm_init: "{{ nvm_dir }}/nvm.sh"
 
 nodejs_versions:
-  - '20.10.0'
-default_nodejs_version: '20.10.0'
+  - '20.18.1'
+default_nodejs_version: '20.18.1'
 remove_nodejs_versions:
   - '16.20.2'
+  - '20.10.0'

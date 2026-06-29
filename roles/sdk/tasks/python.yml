@@ -3,7 +3,10 @@
   ansible.builtin.include_vars:
     file: python.yml
 
-- name: install python versions
+# --- linux: apt-managed python with `alternatives` ---
+
+- name: install python versions (linux)
+  when: ansible_facts.os_family == "Debian"
   become: true
   ansible.builtin.package:
     name:
@@ -15,7 +18,8 @@
     update_cache: true
   loop: "{{ python_versions }}"
 
-- name: install python alternatives
+- name: install python alternatives (linux)
+  when: ansible_facts.os_family == "Debian"
   become: true
   community.general.alternatives:
     name: python3
@@ -24,15 +28,18 @@
     state: present
   loop: "{{ python_versions }}"
 
-- name: select default python alternative
+- name: select default python alternative (linux)
+  when:
+    - ansible_facts.os_family == "Debian"
+    - default_python_version | length > 0
   become: true
   community.general.alternatives:
     name: python3
     path: "/usr/bin/python{{ default_python_version }}"
     state: selected
-  when: "default_python_version | bool"
 
-- name: remove old python versions
+- name: remove old python versions (linux)
+  when: ansible_facts.os_family == "Debian"
   become: true
   ansible.builtin.package:
     name:
@@ -43,11 +50,57 @@
     state: absent
   loop: "{{ remove_python_versions }}"
 
-- name: uninstall old python alternatives
+- name: uninstall old python alternatives (linux)
+  when: ansible_facts.os_family == "Debian"
   become: true
   community.general.alternatives:
     name: python3
     path: "/usr/bin/python{{ item }}"
     link: /usr/bin/python3
     state: absent
+  loop: "{{ remove_python_versions }}"
+
+# --- macos: pyenv-managed python ---
+
+- name: install pyenv (macos)
+  when: ansible_facts.system == "Darwin"
+  community.general.homebrew:
+    name: pyenv
+    state: present
+
+- name: add pyenv to rc files (macos)
+  when: ansible_facts.system == "Darwin"
+  ansible.builtin.blockinfile:
+    path: "{{ item }}"
+    create: true
+    marker: "# {mark} ANSIBLE PYENV"
+    block: |
+      export PYENV_ROOT="$HOME/.pyenv"
+      command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+      eval "$(pyenv init -)"
+  loop: "{{ rc_files }}"
+
+- name: install python versions via pyenv (macos)
+  when: ansible_facts.system == "Darwin"
+  ansible.builtin.shell:
+    cmd: "pyenv install -s {{ item }}"
+    executable: /bin/bash
+    creates: "{{ home }}/.pyenv/versions/{{ item }}"
+  loop: "{{ python_versions }}"
+
+- name: select default pyenv python (macos)
+  when:
+    - ansible_facts.system == "Darwin"
+    - default_python_version | length > 0
+  ansible.builtin.shell:
+    cmd: "pyenv global {{ default_python_version }}"
+    executable: /bin/bash
+  changed_when: false
+
+- name: remove old python versions via pyenv (macos)
+  when: ansible_facts.system == "Darwin"
+  ansible.builtin.shell:
+    cmd: "pyenv uninstall -f {{ item }}"
+    executable: /bin/bash
+    removes: "{{ home }}/.pyenv/versions/{{ item }}"
   loop: "{{ remove_python_versions }}"

@@ -6,3 +6,4 @@
     - { role: bash, tags: bash }
     - { role: git, tags: git }
     - { role: sdk, tags: sdk }
+    - { role: claude, tags: claude }

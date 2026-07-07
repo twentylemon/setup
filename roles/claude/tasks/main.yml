@@ -1,0 +1,33 @@
+---
+- name: create ~/.claude directory
+  ansible.builtin.file:
+    path: "{{ claude_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: create ~/.claude/hooks directory
+  ansible.builtin.file:
+    path: "{{ claude_dir }}/hooks"
+    state: directory
+    mode: "0755"
+
+- name: install claude memory
+  ansible.builtin.copy:
+    src: CLAUDE.md
+    dest: "{{ claude_dir }}/CLAUDE.md"
+    mode: "0644"
+
+- name: install claude statusline
+  ansible.builtin.copy:
+    src: statusline-command.sh
+    dest: "{{ claude_dir }}/statusline-command.sh"
+    mode: "0755"
+
+- name: install claude pretooluse hooks
+  ansible.builtin.copy:
+    src: "hooks/{{ item }}"
+    dest: "{{ claude_dir }}/hooks/{{ item }}"
+    mode: "0755"
+  loop:
+    - git-twentylemon-gate.sh
+    - gh-api-write-gate.sh
